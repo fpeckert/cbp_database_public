@@ -7,12 +7,6 @@ import re, sys
 import fnmatch
 import os
 
-##Define Paths
-root = "/Users/fpeckert/Desktop/CBP Project Final"
-git = "/Users/fpeckert/github/cbp_final/codes"
-sys.path.append(git)
-sys.path.append(root)
-
 ##Import Own Packages
 import cbp_utils
 
@@ -80,49 +74,3 @@ for year in range(1977, 2017):
                 df = df.replace(',','', regex=True)
                 df = df.drop(df.index[0])
                 df.to_csv(root+"/Data Process"+'/'+str(year)+'/ref/geo_ref_'+str(year)+'.csv', sep='\t',index=False)
-
-
-# #Aux Code to Rename Files/Folders quickly
-# geolist = ['co','st','us']
-#
-# for year in range(1977, 2017):
-#         for geo in geolist:
-#             os.chdir(root+'/Data Process/'+str(year)+'/'+ref+'/')
-#
-#             for file in os.listdir('.'):
-#                 if fnmatch.fnmatchcase(file, '*cbp*'):
-#                     os.remove(file)
-
-import numpy as np, pandas as pd
-import re, sys
-import fnmatch
-import os
-import shutil
-
-##Define Paths
-root = "/Users/fpeckert/Desktop/CBP Project Final"
-git = "/Users/fpeckert/github/cbp_final/codes"
-sys.path.append(git)
-sys.path.append(root)
-
-geolist = ['co','st','us']
-
-os.chdir(root+'/Data Input Website/')
-
-for year in range(1977, 2017):
-    shutil.make_archive('efsy_cbp_raw_'+str(year), 'zip', str(year))
-
-
-
-
-
-
-# geolist = ['co','st','us']
-#
-# for year in range(1977, 2017):
-#         for geo in geolist:
-#             os.chdir(root+'/Data Input/'+str(year)+'/'+geo+'/')
-#
-#             for file in os.listdir('.'):
-#                 if fnmatch.fnmatchcase(file, '*cbp*'):
-#                     os.rename(file,"cbp"+str(year)+geo+".txt")
