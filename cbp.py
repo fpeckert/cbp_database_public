@@ -1,10 +1,8 @@
 #Eckert, Fort, Schott, Yang (2019)
-#Corresponding Author: mail@fpeckert.me
 
 import pandas as pd
 from ast import literal_eval
 import sys
-import os
 
 '''
 This method takes in a preorder traversal of the tree of codes (which could be
@@ -186,8 +184,8 @@ def geo_level(code):
     return 3
 
 def refFileName(year):
-    return "ind_ref_"+str(year)+".csv"
-#   return "cbp" + year + "_ind_ref.csv"
+    return "cbp" + year + "_ind_ref.csv"
+
     # names = {
     #     1980: 'sic80.txt',
     #     1981: 'sic81.txt',
@@ -230,32 +228,27 @@ def refFileName(year):
     # return names[int(year)]
 
 def newNaicsCodes(ref_file, year):
-
     refs = pd.read_csv(ref_file)
-    if year <=1997:
-        return list(refs.ind)
-    else:
-        return list(refs.ind)
+    return list(refs.naics)
 
 # produces a list of naics/sic codes that are ordered like a
 # preorder tree traversal. takes in the reference file
 # industry reference file's NAICS or SIC column are preordered
 def naicsCodes(ref_file_name, year, use=''):
-
     naics_codes = []
-    if year <= 1997:
-        if year >= 1988:
+    if int(year) <= 1997:
+        if int(year) >= 1988:
             with open(ref_file_name, 'r') as f:
                 naics_codes = [line.split(None, 1)[0] for line in f]
-        elif year >= 1986:
+        elif int(year) >= 1986:
             with open(ref_file_name, 'r') as f:
                 naics_codes = [line.split(None, 1)[0] for line in f]
             naics_codes = naics_codes[1:] # the first one is 'SIC', so remove that one
-        elif year >= 1980:
+        elif int(year) >= 1980:
             with open(ref_file_name, 'r') as f:
                 naics_codes = [line[0:4] for line in f] # first 4 chars are the code
     else:
-        if year <= 2011:
+        if int(year) <= 2011:
             with open(ref_file_name, 'r') as f:
                 naics_codes = [line.split(None, 1)[0] for line in f]
             # remove the first element, which is 'NAICS'
@@ -266,9 +259,9 @@ def naicsCodes(ref_file_name, year, use=''):
     if use != 'typos':
         # some codes are unused. if you add them to the naics codes, then you
         # have KeyError problems later. so compare them with the national_df
-        national_df = pd.read_csv('cbp' + str(year) + 'us_edit.csv')
+        national_df = pd.read_csv('cbp' + year + 'us_edit.csv')
         real_naics_codes = []
-        if year <= 1997:
+        if int(year) <= 1997:
             real_naics_codes = list(national_df['sic'])
         else:
             real_naics_codes = list(national_df['naics'])
@@ -358,7 +351,7 @@ def splitBigDataFrame(big_df, year):
     st = big_df.loc[(big_df['fipstate'] != 0) & (big_df['fipscty'] == 0)]
 
     original_st = pd.read_csv('cbp' + year + 'st_edit.csv')
-    original_st = original_st.rename(index=str, columns={'sic': 'naics'})
+    original_st = original_st.rename(index=str, columns={'ind': 'naics'})
     original_st['fipscty'] = 0
 
     st = pd.merge(st, original_st, on=['naics', 'fipstate', 'fipscty'], how='outer').fillna(0)
@@ -375,7 +368,7 @@ def splitBigDataFrame(big_df, year):
     co = big_df.loc[(big_df['fipstate'] != 0) & (big_df['fipscty'] != 0)]
 
     original_co = pd.read_csv('cbp' + year + 'co_edit.csv')
-    original_co = original_co.rename(index=str, columns={'sic': 'naics'})
+    original_co = original_co.rename(index=str, columns={'ind': 'naics'})
 
     co = pd.merge(co, original_co, on=['naics', 'fipstate', 'fipscty'], how='outer').fillna(0)
     # rename columns
@@ -416,11 +409,6 @@ def findNonzeroSlack(ub_slack, lb_slack):
 def save(ub, lb, year="2016", optional_name=""):
     big_df = matrixToBigDataFrame(ub, lb)
     (us, st, co) = splitBigDataFrame(big_df, year)
-
-    if int(year) <= 1997:
-        us = us.rename(index=str, columns={'naics': 'sic'})
-        co = co.rename(index=str, columns={'naics': 'sic'})
-        st = st.rename(index=str, columns={'naics': 'sic'})
 
     us.to_csv("cbp" + year + "us" + optional_name + ".csv", index=False)
     st.to_csv("cbp" + year + "st" + optional_name + ".csv", index=False)
